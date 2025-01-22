@@ -98,7 +98,39 @@ class CasNormalDecoder(nn.Module):
         N2d8 = self.N2deconv8(F.relu(N2d7))
         findNorm = F.normalize(torch.tanh(N2d8))     
         return findNorm
-   
+
+
+class CasFNE_3N(nn.Module):
+    # initializers
+    def __init__(self, featdim=128):
+        super(CasFNE_3N, self).__init__()
+
+        #based network
+        self.BasedNormalNet = CasFNE_Based(featdim=featdim)
+        # CascadedNet_1 encoder
+        self.NormalEncoder = CasNormalEncoder(featdim=featdim)
+        # CascadedNet_1 decoder
+        self.NormalDecoder = CasNormalDecoder(featdim=featdim)
+
+               
+    # forward method
+    def forward(self, input):
+        preNorm_1, structfeats = self.BasedNormalNet(input)
+
+        # cascade_1, e7
+        casNormFeat_1 = self.NormalEncoder(preNorm_1)
+        preNorm_2 = self.NormalDecoder(structfeats, casNormFeat_1)
+        # cascade_2, e7
+        casNormFeat_2 = self.NormalEncoder(preNorm_2)
+        preNorm_3 = self.NormalDecoder(structfeats, casNormFeat_2)
+                 
+        return preNorm_1, preNorm_2, preNorm_3
+    
+    # weight_init
+    def weight_init(self, mean, std):
+        for m in self._modules:
+            normal_init(self._modules[m], mean, std)
+
 
 class CasFNE_4N(nn.Module):
     # initializers
@@ -211,4 +243,10 @@ if __name__ == "__main__":
     print('FLOPs = ' + str((flops_1)/1000**3) + 'G')
     print('Params = ' + str((params_1)/1000**2) + 'M')
     
-
+# D_model_path = '/media/xteam1/oo1/result/MM_Results/MM_23/00_E7_3N/ckpt/MM23_E7_3N_epoch_200.pth'
+# load_Mod = torch.load(D_model_path)
+# if D_model_path=='':
+#     epoch = 0
+# else:
+#     epoch = load_Mod['epoch']
+# model.load_state_dict(load_Mod['model'])
