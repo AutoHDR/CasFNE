@@ -8,7 +8,7 @@ import numpy as np
 from net.model import *
 from torchvision import transforms
 from dataloader_Cas import  getPhotoDB_PreTrain_23, get_300W_23
-\import argparse
+import argparse
 import log
 import copy
 
@@ -81,8 +81,8 @@ valtrain_dl  = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True,
 
 
 device = "cuda:1"
-from aug_arc.NormalEncoder_L4 import *
-EDmodel = CascadedNetResNetUNV1FNorm_5N(featdim=32).to(device)
+from net.model import *
+EDmodel = CasFNE_3N(featdim=32).to(device)
 D_model_path = '/home/xteam/PaperCode/MM23/CasNet/epoch_500.pth'
 load_Mod = torch.load(D_model_path)
 EDmodel.load_state_dict(load_Mod['model'])
@@ -95,29 +95,21 @@ save_path = D_model_path[: -18]
 testImgsPath = save_path + '/celebatest/'
 mkdir(testImgsPath) 
 
-def N_SFS2CM(normal):
-    tt = torch.zeros_like(normal)
-    tt[:, 0, :, :] = normal[:, 1, :, :]
-    tt[:, 1, :, :] = - normal[:, 0, :, :]
-    tt[:, 2, :, :] = normal[:, 2, :, :]
-    return tt
 
 EDmodel.eval()
 with torch.no_grad():
     for index, image in enumerate(celebA_dl):
         img_orig = image[0].to(device)
-        img_orig_L = image[1].to(device)
         face_path = image[2]
         b, c, w, h = img_orig.shape
 
-        predNorm = EDmodel(img_orig)
-        img_Ce_Norm_C = F.normalize(predNorm[-1])
+        predNorm1, predNorm2, predNorm3 = EDmodel(img_orig)
 
         for ii in range(b):
             tpName = face_path[ii].split('/')[-1]   # face_path[ii][-9:]
             svgname = testImgsPath #+ tpName.split('.')[0] + '/' 
             mkdir(svgname)
             save_image(img_orig[ii], svgname + tpName.replace('.png', '_input.png'), nrow=1, normalize=True)
-            save_image(get_normal_255(N_SFS2CM(img_Ce_Norm_C))[ii], svgname + tpName.replace('.png', '_norm1.png'), nrow=1, normalize=True)
+            save_image(get_normal_255(predNorm3)[ii], svgname + tpName.replace('.png', '_norm1.png'), nrow=1, normalize=True)
         print(index, len(celebA_dl))
 
