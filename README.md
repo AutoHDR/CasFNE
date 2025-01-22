@@ -21,6 +21,7 @@ From top to bottom are the input face, exemplar and refinement normal.
 * [300W](https://ibug.doc.ic.ac.uk/resources/300-W/)
 * [FFHQ](https://drive.google.com/drive/folders/1u2xu7bSrWxrbUxk-dT-UvEJq8IjdmNTP) 
 * [CelebAMask-HQ](https://github.com/switchablenorms/CelebAMask-HQ)
+  
 #### Download checkpoints: 
 * [cpkts](https://drive.google.com/drive/folders/1_mOEuEHVZThBMiUyh4HKdoAko1wOFgW_?usp=drive_link)
 
