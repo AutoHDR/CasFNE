@@ -83,7 +83,7 @@ valtrain_dl  = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True,
 device = "cuda:1"
 from net.model import *
 EDmodel = CasFNE_3N(featdim=32).to(device)
-D_model_path = '/home/xteam/PaperCode/MM23/CasNet/epoch_500.pth'
+D_model_path = './cpkt/epoch_500.pth'
 load_Mod = torch.load(D_model_path)
 EDmodel.load_state_dict(load_Mod['model'])
 
